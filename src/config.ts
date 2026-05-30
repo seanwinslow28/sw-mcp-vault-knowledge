@@ -9,7 +9,8 @@
  * is ever readable. Never 00_inbox, health, 90_system, 60_archive,
  * operating-models, prj-job-hunt-2026, the-block.
  */
-import { resolve, sep } from "node:path";
+import { relative, resolve, sep, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
 /** Subdirectories of the vault that may be read. Hard-coded; not configurable by request. */
 export const READABLE_SUBDIRS = ["concepts", "connections", "qa"] as const;
@@ -25,8 +26,21 @@ export interface ServerConfig {
    * under one of these prefixes or the read is refused.
    */
   allowedRoots: string[];
-  /** Knowledge subtree prefix used to match chunk/file paths in the DB. */
+  /** Absolute knowledge subtree path (parent of concepts/connections/qa). */
   knowledgeDir: string;
+  /**
+   * Knowledge dir relative to vault root (e.g. "knowledge"). chunks.file_path in
+   * the DB is vault-root-relative, so SQL LIKE prefixes are built from this.
+   */
+  knowledgeRel: string;
+  /** True when running against the bundled public demo vault (no env set). */
+  demo: boolean;
+}
+
+/** Absolute path to the bundled demo vault (ships in the npm package). */
+function demoVaultRoot(): string {
+  // config.js lives in build/; the demo vault ships at <pkg>/examples/demo-vault.
+  return resolve(dirname(fileURLToPath(import.meta.url)), "..", "examples", "demo-vault");
 }
 
 /**
@@ -44,21 +58,38 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
   const vaultRoot = env.VAULT_ROOT?.trim();
   const knowledgeName = (env.VAULT_KNOWLEDGE_DIR?.trim() || "knowledge").replace(/^\/+|\/+$/g, "");
 
-  if (!dbPath) {
-    throw new Error("VAULT_DB is required (absolute path to the read-only .vault-index.db).");
-  }
-  if (!vaultRoot) {
-    throw new Error("VAULT_ROOT is required (absolute path to the vault root).");
+  // Zero-config demo mode: with NEITHER env var set, serve the bundled public
+  // espresso vault so `npx` works out of the box. Setting one without the other
+  // is a misconfiguration and fails loudly.
+  let absDb: string;
+  let absVault: string;
+  let demo = false;
+  if (!dbPath && !vaultRoot) {
+    absVault = demoVaultRoot();
+    absDb = resolve(absVault, "demo-index.db");
+    demo = true;
+  } else {
+    if (!dbPath) {
+      throw new Error(
+        "VAULT_DB is required when VAULT_ROOT is set (or unset both for the demo vault).",
+      );
+    }
+    if (!vaultRoot) {
+      throw new Error(
+        "VAULT_ROOT is required when VAULT_DB is set (or unset both for the demo vault).",
+      );
+    }
+    absDb = resolve(dbPath);
+    absVault = resolve(vaultRoot);
   }
 
-  const absDb = resolve(dbPath);
-  const absVault = resolve(vaultRoot);
   const knowledgeDir = resolve(absVault, knowledgeName);
 
   // Allowlist: only the three knowledge subdirectories, fully resolved.
   const allowedRoots = READABLE_SUBDIRS.map((sub) => resolve(knowledgeDir, sub));
+  const knowledgeRel = relative(absVault, knowledgeDir).split(sep).join("/");
 
-  return { dbPath: absDb, vaultRoot: absVault, allowedRoots, knowledgeDir };
+  return { dbPath: absDb, vaultRoot: absVault, allowedRoots, knowledgeDir, knowledgeRel, demo };
 }
 
 /**

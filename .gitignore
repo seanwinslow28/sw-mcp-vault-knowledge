@@ -4,3 +4,7 @@ build/
 .DS_Store
 .env
 .cache/
+# Transient SQLite sidecars — the demo-index.db itself IS committed.
+*.db-journal
+*.db-wal
+*.db-shm

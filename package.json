@@ -5,20 +5,22 @@
   "description": "Query a typed knowledge graph over an Obsidian vault: semantic concept search, contradiction surfacing across reasoning edges, and article retrieval. Read-only, local-first, stdio.",
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=22.5.0"
   },
   "bin": {
     "vault-knowledge-mcp": "build/index.js"
   },
   "scripts": {
     "build": "tsc && chmod 755 build/index.js",
+    "build:demo": "npm run build && node scripts/build-demo-vault.mjs",
     "start": "node build/index.js",
+    "smoke": "node scripts/smoke.mjs",
     "test": "node --test --import tsx test/*.test.ts",
     "prepublishOnly": "! grep -rn 'console\\.log' src/ || (echo 'console.log forbidden in src/ (stdio transport — use console.error)' && exit 1)"
   },
   "files": [
     "build",
-    "examples/demo-vault.sqlite3"
+    "examples/demo-vault/"
   ],
   "keywords": [
     "mcp",
@@ -38,11 +40,9 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.29.0",
     "@huggingface/transformers": "^3.3.0",
-    "better-sqlite3": "^11.8.0",
     "zod": "^3.25.0"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.11",
     "@types/node": "^22.0.0",
     "tsx": "^4.19.0",
     "typescript": "^5.0.0"

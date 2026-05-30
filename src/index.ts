@@ -8,6 +8,7 @@
  * NOTE: stdio uses stdout for the JSON-RPC channel. Never console.log here —
  * diagnostics go to stderr (console.error). prepublishOnly enforces this.
  */
+import "./suppress-experimental-warning.js"; // must precede any node:sqlite load
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 
@@ -121,7 +122,12 @@ server.registerTool(
 async function main(): Promise<void> {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("vault-knowledge MCP server running on stdio");
+  const mode = config?.demo
+    ? "demo vault (bundled espresso fixture — set VAULT_DB + VAULT_ROOT to use your own)"
+    : config
+      ? `vault: ${config.vaultRoot}`
+      : `unconfigured (${configError})`;
+  console.error(`vault-knowledge MCP server running on stdio — ${mode}`);
 }
 
 main().catch((err) => {

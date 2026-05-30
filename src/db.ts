@@ -1,26 +1,37 @@
 /**
- * Read-only SQLite access. There is no write surface anywhere in this server.
+ * Read-only SQLite access via Node's built-in `node:sqlite` (Node >= 22.5).
  *
- * better-sqlite3 is opened with { readonly: true, fileMustExist: true }. If the
- * file is missing we surface that as a clean empty-state upstream rather than
- * throwing an opaque error.
+ * Chosen over better-sqlite3 deliberately: zero dependencies, zero native build,
+ * no node-gyp / prebuilds. That keeps `npm install` frictionless for an
+ * evaluator on any platform — the locked north star for this artifact.
+ *
+ * node:sqlite is loaded via DYNAMIC import (not a static one) so it pulls in
+ * only at the first tool call — after the experimental-warning suppressor in
+ * index.ts has installed its override. A static import would hoist the load
+ * ahead of the suppressor and leak the warning to stderr.
+ *
+ * There is no write surface anywhere: the DB is opened { readOnly: true } and
+ * the engine rejects any write (verified).
  */
-import Database from "better-sqlite3";
 import { existsSync } from "node:fs";
+import type { DatabaseSync } from "node:sqlite";
 import type { ServerConfig } from "./config.js";
 
 export interface OpenDbResult {
-  db: Database.Database | null;
+  db: DatabaseSync | null;
   /** True when the DB file does not exist — callers should return vault-empty. */
   missing: boolean;
 }
 
-export function openReadOnly(cfg: ServerConfig): OpenDbResult {
+let DatabaseSyncCtor: typeof DatabaseSync | null = null;
+
+export async function openReadOnly(cfg: ServerConfig): Promise<OpenDbResult> {
   if (!existsSync(cfg.dbPath)) {
     return { db: null, missing: true };
   }
-  const db = new Database(cfg.dbPath, { readonly: true, fileMustExist: true });
-  // Defense in depth: refuse to be tricked into writes even if a query tries.
-  db.pragma("query_only = ON");
+  if (!DatabaseSyncCtor) {
+    DatabaseSyncCtor = (await import("node:sqlite")).DatabaseSync;
+  }
+  const db = new DatabaseSyncCtor(cfg.dbPath, { readOnly: true });
   return { db, missing: false };
 }
