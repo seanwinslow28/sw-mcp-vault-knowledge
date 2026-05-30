@@ -5,7 +5,7 @@
  * Transport: stdio (no HTTP, no auth, no SaaS).
  * Three tools, hard cap: search_concepts, find_contradictions, get_article.
  *
- * NOTE: stdio uses stdout for the JSON-RPC channel. Never console.log here —
+ * NOTE: stdio uses stdout for the JSON-RPC channel. Never write to stdout here —
  * diagnostics go to stderr (console.error). prepublishOnly enforces this.
  */
 import "./suppress-experimental-warning.js"; // must precede any node:sqlite load
