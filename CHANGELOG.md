@@ -75,4 +75,16 @@ All notable changes to `@swins/vault-knowledge-mcp`.
   get_article resolves frontmatter + in/out wikilinks; out-of-scope reads denied.
 - Tests: 10 hermetic cases (added the malicious-slug battery + demo-mode config).
 
-### Phase 4 — README + EXPLANATION + Loom + publish (pending)
+### Phase 4 — README + EXPLANATION + Loom + publish (2026-05-30, copy drafted)
+- README rewritten to < 200 words of prose with both copy-paste config blocks
+  (zero-config demo + own-vault). Voice calibrated ~40%.
+- `docs/EXPLANATION.md` — 4Q comprehension artifact (What is this / Why this
+  approach / What would break / What did I learn), tuned for a < 90s recruiter
+  cold-read. Leads on the node:sqlite driver judgment call and the contradiction-
+  as-product thesis; names the cross-engine embedding approximation honestly.
+- `docs/LOOM-SCRIPT.md` — 90s spoken script, all 3 tools, contradiction as the
+  hook, zero-infra close.
+- `docs/LINKEDIN-DRAFT.md` — syndication post (Sean sends), ~75% voice, no
+  "hire me" closer per the writing-voice-modes desperation anti-pattern.
+- `server.json` description shortened to 98 chars (registry caps at 100).
+- Publish (npm + MCP registry) pending — runs on Sean's Mac via the frozen flow.

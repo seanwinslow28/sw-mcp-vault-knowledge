@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
   "name": "com.seanwinslow/vault-knowledge",
-  "description": "Query a typed knowledge graph over an Obsidian vault: semantic concept search, contradiction surfacing across reasoning edges, and article retrieval.",
+  "description": "Read-only MCP over a vault's typed knowledge graph: concept search, contradictions, article fetch.",
   "version": "0.1.0",
   "repository": {
     "url": "https://github.com/seanwinslow28/sw-mcp-vault-knowledge",
