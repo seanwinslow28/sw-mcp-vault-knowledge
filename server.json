@@ -1,0 +1,20 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "name": "com.seanwinslow/vault-knowledge",
+  "description": "Query a typed knowledge graph over an Obsidian vault: semantic concept search, contradiction surfacing across reasoning edges, and article retrieval.",
+  "version": "0.1.0",
+  "repository": {
+    "url": "https://github.com/seanwinslow28/sw-mcp-vault-knowledge",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@swins/vault-knowledge-mcp",
+      "version": "0.1.0",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
